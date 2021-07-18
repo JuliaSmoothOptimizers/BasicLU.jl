@@ -1,4 +1,5 @@
 cint = basiclu.cint
+cdbl = basiclu.cdbl
 spvector = basiclu.spvector
 spmatrix = basiclu.spmatrix
 BASICLU_OK = basiclu.BASICLU_OK

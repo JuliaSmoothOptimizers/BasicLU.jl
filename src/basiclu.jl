@@ -1,17 +1,13 @@
 #
 # Julia interface to BASICLU
 #
-# BASICLU must have been compiled with the integer type matching cint (see
-# below). The shared library must be in the load path.
-#
 
 module basiclu
 
 using LinearAlgebra
 using Printf
 using SparseArrays
-
-const libbasiclu = "/home/alexis/Applications/basiclu/lib/libbasiclu.so"
+using basiclu_jll
 
 const cint = Int64
 const cdbl = Cdouble
