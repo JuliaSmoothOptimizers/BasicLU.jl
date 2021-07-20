@@ -1,6 +1,6 @@
 name = "basiclu"
 uuid = "f55c55da-c227-4c78-8e30-b72a48476979"
-authors = ["Alexis Montoison <alexis.montoison@polymtl.ca>"]
+authors = ["Lukas Schork (@lschork2)", "Alexis Montoison (@amontoison)"]
 version = "0.1.0"
 
 [deps]
