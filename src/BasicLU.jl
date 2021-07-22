@@ -21,7 +21,6 @@ const spmatrix = SparseMatrixCSC{cdbl,cint}
 # exported BASICLU functions
 # =============================================================================
 
-import LinearAlgebra.factorize
 export BLU, initialize, factorize, get_factors, solve, solve4update, update, maxvolume, maxvolume_basis
 
 # =============================================================================
@@ -228,6 +227,9 @@ end
 # =============================================================================
 # factorize
 # =============================================================================
+
+import LinearAlgebra.factorize
+
 """
     factorize(this, B)
 
@@ -270,7 +272,6 @@ end
 Export LU factors after fresh factorization.
 
 # Example
-```jldoctest
 julia> m = 100;
 julia> B = spdiagm((ones(m-1), 4*ones(m), ones(m-1)), [-1 0 1]);
 julia> this = BasicLU.initialize(m);
@@ -279,7 +280,6 @@ julia> BasicLU.factorize(this, B)
 julia> (L,U,p,q) = BasicLU.get_factors(this);
 julia> norm(L*U-B[p,q], Inf)
 1.1102230246251565e-16
-```
 """
 function get_factors(this::BLU)
     m = convert(cint, this.xstore[BASICLU_DIM])
