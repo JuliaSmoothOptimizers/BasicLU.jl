@@ -1,6 +1,6 @@
 using LinearAlgebra, SparseArrays, MAT
 using Printf, Test
-using basiclu
+using BasicLU
 
 include("utils.jl")
 
@@ -9,10 +9,10 @@ test_factorize("./data/", true)
 test_update("./data/")
 
 m = 1000
-this = basiclu.initialize(m)
+this = BasicLU.initialize(m)
 B = sprand(m, m, 5e-3) + I
-err = basiclu.factorize(this, B)
-if err ≠ basiclu.BASICLU_OK
+err = BasicLU.factorize(this, B)
+if err ≠ BasicLU.BASICLU_OK
     error("factorization failed or singular")
 end
 rhs = randn(m)
