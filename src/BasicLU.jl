@@ -272,14 +272,15 @@ end
 Export LU factors after fresh factorization.
 
 # Example
-julia> m = 100;
-julia> B = spdiagm((ones(m-1), 4*ones(m), ones(m-1)), [-1 0 1]);
-julia> this = BasicLU.initialize(m);
-julia> BasicLU.factorize(this, B)
-0
-julia> (L,U,p,q) = BasicLU.get_factors(this);
-julia> norm(L*U-B[p,q], Inf)
+```
+m = 100
+B = spdiagm(-1 => ones(m-1), 0 => 4*ones(m), 1 => ones(m-1))
+this = BasicLU.initialize(m)
+BasicLU.factorize(this, B)
+(L,U,p,q) = BasicLU.get_factors(this)
+norm(L*U-B[p,q], Inf)
 1.1102230246251565e-16
+```
 """
 function get_factors(this::BLU)
     m = convert(cint, this.xstore[BASICLU_DIM])
