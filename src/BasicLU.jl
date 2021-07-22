@@ -2,7 +2,7 @@
 # Julia interface to BASICLU
 #
 
-module basiclu
+module BasicLU
 
 using LinearAlgebra
 using Printf
@@ -273,10 +273,10 @@ Export LU factors after fresh factorization.
 ```jldoctest
 julia> m = 100;
 julia> B = spdiagm((ones(m-1), 4*ones(m), ones(m-1)), [-1 0 1]);
-julia> this = basiclu.initialize(m);
-julia> basiclu.factorize(this, B)
+julia> this = BasicLU.initialize(m);
+julia> BasicLU.factorize(this, B)
 0
-julia> (L,U,p,q) = basiclu.get_factors(this);
+julia> (L,U,p,q) = BasicLU.get_factors(this);
 julia> norm(L*U-B[p,q], Inf)
 1.1102230246251565e-16
 ```

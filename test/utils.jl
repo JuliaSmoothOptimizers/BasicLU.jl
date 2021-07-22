@@ -1,12 +1,12 @@
-cint = basiclu.cint
-cdbl = basiclu.cdbl
-spvector = basiclu.spvector
-spmatrix = basiclu.spmatrix
-BASICLU_OK = basiclu.BASICLU_OK
-BASICLU_UPDATE_COST = basiclu.BASICLU_UPDATE_COST
-BASICLU_NFACTORIZE = basiclu.BASICLU_NFACTORIZE
-BASICLU_NFORREST_TOTAL = basiclu.BASICLU_NFORREST_TOTAL
-BASICLU_NUPDATE_TOTAL = basiclu.BASICLU_NUPDATE_TOTAL
+cint = BasicLU.cint
+cdbl = BasicLU.cdbl
+spvector = BasicLU.spvector
+spmatrix = BasicLU.spmatrix
+BASICLU_OK = BasicLU.BASICLU_OK
+BASICLU_UPDATE_COST = BasicLU.BASICLU_UPDATE_COST
+BASICLU_NFACTORIZE = BasicLU.BASICLU_NFACTORIZE
+BASICLU_NFORREST_TOTAL = BasicLU.BASICLU_NFORREST_TOTAL
+BASICLU_NUPDATE_TOTAL = BasicLU.BASICLU_NUPDATE_TOTAL
 
 # =============================================================================
 # readmat: read variables from MATLAB file

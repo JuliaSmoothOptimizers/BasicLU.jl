@@ -1,4 +1,4 @@
-name = "basiclu"
+name = "BasicLU"
 uuid = "f55c55da-c227-4c78-8e30-b72a48476979"
 authors = ["Lukas Schork (@lschork2)", "Alexis Montoison (@amontoison)"]
 version = "0.1.0"
