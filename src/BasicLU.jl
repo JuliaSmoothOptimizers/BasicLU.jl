@@ -452,7 +452,7 @@ function update(this::BLU, xtbl::cdbl)
                     xtbl)
         if err != BASICLU_REALLOCATE break; end
         realloc(this)
-    end        
+    end
     if err != BASICLU_OK
         msg = @sprintf("basiclu_update() status code: %d", err)
         error(msg)
@@ -538,7 +538,7 @@ end
     is minimum (this is the row rank deficiency of A).
 """
 function maxvolume_basis(A::spmatrix; volumetol::cdbl=2.0, lindeptol::cdbl=1e-8,
-                         maxpass::cint=2)
+                         maxpass::cint=2, verbose::Bool=false)
     m, n = size(A)
     rowmax = maximum(abs.(A), dims=2)[:]
     rowmax = max.(rowmax, 1.)
@@ -547,7 +547,7 @@ function maxvolume_basis(A::spmatrix; volumetol::cdbl=2.0, lindeptol::cdbl=1e-8,
     obj = basiclu_object(m)
     for pass = 1:maxpass
         nupdate = maxvolume(obj, AI, basis, volumetol)
-        @printf("pass %d: %d updates\n", pass, nupdate)
+        verbose && @printf("pass %d: %d updates\n", pass, nupdate)
         if nupdate == 0 break; end
     end
     return basis, obj
