@@ -1,7 +1,7 @@
 name = "BasicLU"
 uuid = "f55c55da-c227-4c78-8e30-b72a48476979"
 authors = ["Lukas Schork (@lschork2)", "Alexis Montoison (@amontoison)"]
-version = "0.1.0"
+version = "0.1.1"
 
 [deps]
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"

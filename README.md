@@ -17,7 +17,7 @@
 
 ```julia
 julia> ]
-pkg> add https://github.com/JuliaSmoothOptimizers/BasicLU.jl.git
+pkg> add BasicLU
 pkg> test BasicLU
 ```
 
