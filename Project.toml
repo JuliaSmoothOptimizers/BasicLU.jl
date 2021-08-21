@@ -1,7 +1,7 @@
 name = "BasicLU"
 uuid = "f55c55da-c227-4c78-8e30-b72a48476979"
 authors = ["Lukas Schork (@lschork2)", "Alexis Montoison (@amontoison)"]
-version = "0.1.1"
+version = "0.1.2"
 
 [deps]
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
@@ -11,6 +11,7 @@ basiclu_jll = "5629d00f-ba42-508e-84a8-8193befe9d4f"
 
 [compat]
 julia = "^1.6.0"
+basiclu_jll = "<2.2.0"
 
 [extras]
 MAT = "23992714-dd62-5051-b70f-ba57cb901cac"
