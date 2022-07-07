@@ -13,4 +13,8 @@ makedocs(
   pages = ["Home" => "index.md"],
 )
 
-deploydocs(repo = "github.com/JuliaSmoothOptimizers/BasicLU.jl.git", devbranch = "main")
+deploydocs(
+  repo = "github.com/JuliaSmoothOptimizers/BasicLU.jl.git",
+  push_preview = true,
+  devbranch = "main",
+)
