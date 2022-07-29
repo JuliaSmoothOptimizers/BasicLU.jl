@@ -13,6 +13,10 @@
 [codecov-img]: https://codecov.io/gh/JuliaSmoothOptimizers/BasicLU.jl/branch/main/graph/badge.svg
 [codecov-url]: https://app.codecov.io/gh/JuliaSmoothOptimizers/BasicLU.jl
 
+## How to cite
+
+If you use BasicLU.jl in your work, please cite using the format given in [CITATION.bib](CITATION.bib).
+
 ## How to install
 
 ```julia
