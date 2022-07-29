@@ -1,8 +1,8 @@
 # A [Julia](http://julialang.org) Interface to [BASICLU](https://github.com/ERGO-Code/basiclu)
 
-| **Documentation** | **Continuous Integration** | **Coverage** |
-|:-----------------:|:--------------------------:|:------------:|
-| [![docs-stable][docs-stable-img]][docs-stable-url] [![docs-dev][docs-dev-img]][docs-dev-url] | [![build-gh][build-gh-img]][build-gh-url] | [![codecov][codecov-img]][codecov-url] |
+| **Documentation** | **Continuous Integration** | **Coverage** | **DOI** |
+|:-----------------:|:--------------------------:|:------------:|:-------:|
+| [![docs-stable][docs-stable-img]][docs-stable-url] [![docs-dev][docs-dev-img]][docs-dev-url] | [![build-gh][build-gh-img]][build-gh-url] | [![codecov][codecov-img]][codecov-url] | [![DOI](https://zenodo.org/badge/386473966.svg)](https://zenodo.org/badge/latestdoi/386473966)
 
 [docs-stable-img]: https://img.shields.io/badge/docs-stable-blue.svg
 [docs-stable-url]: https://JuliaSmoothOptimizers.github.io/BasicLU.jl/stable
