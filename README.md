@@ -28,3 +28,10 @@ pkg> test BasicLU
 ## Content
 
 [BASICLU](https://github.com/ERGO-Code/basiclu) implements a sparse LU factorization and an update method that maintains the factorization after column changes to the matrix. It is intended for use in simplex-type algorithms and has been tailored to hypersparse linear programming problems. It provides routines for solving linear systems with a dense or sparse right-hand side. BASICLU can be also used to compute a maximum volume basis and the row deficiency of a m-by-n matrix A.
+
+## Bug reports and discussions
+
+If you think you found a bug, feel free to open an [issue](https://github.com/JuliaSmoothOptimizers/BasicLU.jl/issues).
+Focused suggestions and requests can also be opened as issues. Before opening a pull request, start an issue or a discussion on the topic, please.
+
+If you want to ask a question not suited for a bug report, feel free to start a discussion [here](https://github.com/JuliaSmoothOptimizers/Organization/discussions). This forum is for general discussion about this repository and the [JuliaSmoothOptimizers](https://github.com/JuliaSmoothOptimizers) organization, so questions about any of our packages are welcome.
