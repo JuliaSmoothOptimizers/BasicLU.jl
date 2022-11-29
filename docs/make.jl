@@ -9,7 +9,7 @@ makedocs(
                            ansicolor = true,
                            prettyurls = get(ENV, "CI", nothing) == "true"),
   sitename = "BasicLU.jl",
-  pages = ["Home" => "index.md"],
+  pages = ["Documentation" => "index.md"],
 )
 
 deploydocs(
