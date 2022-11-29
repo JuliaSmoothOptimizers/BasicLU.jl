@@ -1,8 +1,8 @@
-# A [Julia](http://julialang.org) Interface to [BASICLU](https://github.com/ERGO-Code/basiclu)
+# A [Julia](http://julialang.org) Interface to [BasicLU](https://github.com/ERGO-Code/basiclu)
 
 | **Documentation** | **Continuous Integration** | **Coverage** | **DOI** |
 |:-----------------:|:--------------------------:|:------------:|:-------:|
-| [![docs-stable][docs-stable-img]][docs-stable-url] [![docs-dev][docs-dev-img]][docs-dev-url] | [![build-gh][build-gh-img]][build-gh-url] | [![codecov][codecov-img]][codecov-url] | [![DOI](https://zenodo.org/badge/386473966.svg)](https://zenodo.org/badge/latestdoi/386473966)
+| [![docs-stable][docs-stable-img]][docs-stable-url] [![docs-dev][docs-dev-img]][docs-dev-url] | [![build-gh][build-gh-img]][build-gh-url] [![build-cirrus][build-cirrus-img]][build-cirrus-url] | [![codecov][codecov-img]][codecov-url] | [![DOI](https://zenodo.org/badge/386473966.svg)](https://zenodo.org/badge/latestdoi/386473966)
 
 [docs-stable-img]: https://img.shields.io/badge/docs-stable-blue.svg
 [docs-stable-url]: https://JuliaSmoothOptimizers.github.io/BasicLU.jl/stable
@@ -10,6 +10,8 @@
 [docs-dev-url]: https://JuliaSmoothOptimizers.github.io/BasicLU.jl/dev
 [build-gh-img]: https://github.com/JuliaSmoothOptimizers/BasicLU.jl/workflows/CI/badge.svg?branch=main
 [build-gh-url]: https://github.com/JuliaSmoothOptimizers/BasicLU.jl/actions
+[build-cirrus-img]: https://img.shields.io/cirrus/github/JuliaSmoothOptimizers/BasicLU.jl?logo=Cirrus%20CI
+[build-cirrus-url]: https://cirrus-ci.com/github/JuliaSmoothOptimizers/BasicLU.jl
 [codecov-img]: https://codecov.io/gh/JuliaSmoothOptimizers/BasicLU.jl/branch/main/graph/badge.svg
 [codecov-url]: https://app.codecov.io/gh/JuliaSmoothOptimizers/BasicLU.jl
 
@@ -27,7 +29,19 @@ pkg> test BasicLU
 
 ## Content
 
-[BASICLU](https://github.com/ERGO-Code/basiclu) implements a sparse LU factorization and an update method that maintains the factorization after column changes to the matrix. It is intended for use in simplex-type algorithms and has been tailored to hypersparse linear programming problems. It provides routines for solving linear systems with a dense or sparse right-hand side. BASICLU can be also used to compute a maximum volume basis and the row deficiency of a m-by-n matrix A.
+[BasicLU](https://github.com/ERGO-Code/basiclu) implements a sparse LU factorization and an update method that maintains the factorization after column changes to the matrix.
+It is intended for use in simplex-type algorithms and has been tailored to hypersparse linear programming problems.
+It provides routines for solving linear systems with a dense or sparse right-hand side.
+BasicLU can be also used to compute a maximum volume basis and the row deficiency of a m-by-n matrix A.
+
+## Custom Installation
+
+**Note: BasicLU is already precompiled with Yggdrasil for all platforms.**
+
+To use your custom BasicLU, set the environment variable `JULIA_BASICLU_LIBRARY_PATH`
+to point to the folder holding the basicLU shared libraries before `using BasicLU`.
+
+The `JULIA_BASICLU_LIBRARY_PATH` environment variable may be set permanently in the shell's startup file, or in `$HOME/.julia/config/startup.jl`.
 
 ## Bug reports and discussions
 
