@@ -2,6 +2,8 @@ using LinearAlgebra, SparseArrays, MAT
 using Printf, Test
 using BasicLU
 
+@info("BASICLU_INSTALLATION: $(BasicLU.BASICLU_INSTALLATION)")
+
 include("utils.jl")
 
 test_small()
