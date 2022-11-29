@@ -23,7 +23,7 @@ else
 end
 
 export Param, Info, basiclu_object
-export paranumber, infonumber, getdim, getparam, getinfo, setparam!
+export paramnumber, infonumber, getdim, getparam, getinfo, setparam!
 export factorize, getfactors, solve, solve!, solve_for_update, update, maxvolume, maxvolbasis
 
 # status codes
