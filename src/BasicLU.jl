@@ -524,17 +524,17 @@ function solve!(F::LUFactor, rhs::SparseVector{Float64, Int64}, trans::Char)
 end
 
 """
-    solve_for_update(F::LUFactor, rhs::SparseVector{Float64, Int64}; getsol::Bool=false) -> SparseVector{Float64, Int64}
+    solve_for_update(F::LUFactor, newcol::SparseVector{Float64, Int64}; getsol::Bool=false) -> SparseVector{Float64, Int64}
 
-Solve forward system in preparation to update the factorization. `rhs` holds the
+Solve forward system in preparation to update the factorization. `newcol` holds the
 column to be inserted into the factorized matrix in the next call to
 [`update`](@ref). When `getsol = true`, then the solution from the forward
-solve with right-hand side `rhs` is returned. Otherwise only the update is
+solve with right-hand side `newcol` is returned. Otherwise only the update is
 prepared.
 """
-function solve_for_update(F::LUFactor, rhs::SparseVector{Float64, Int64}; getsol::Bool=false)
+function solve_for_update(F::LUFactor, newcol::SparseVector{Float64, Int64}; getsol::Bool=false)
     dim = getdim(F)
-    if length(rhs) != dim
+    if length(newcol) != dim
         throw(DimensionMismatch("dimension of right-hand side does not match basiclu object"))
     end
     if dim == 0
@@ -542,7 +542,7 @@ function solve_for_update(F::LUFactor, rhs::SparseVector{Float64, Int64}; getsol
     end
     retcode = ccall((:basiclu_obj_solve_for_update, libbasiclu), Int64,
                     (Ptr{basiclu_object_type}, Int64, Ptr{Int64}, Ptr{Float64}, Cchar, Int64),
-                    pointer_from_objref(F), nnz(rhs), rowvals(rhs) .- 1, nonzeros(rhs), 'N', getsol ? 1 : 0)
+                    pointer_from_objref(F), nnz(newcol), rowvals(newcol) .- 1, nonzeros(newcol), 'N', getsol ? 1 : 0)
     if retcode == BASICLU_ERROR_invalid_call
         throw(ErrorException("no factorization available"))
     end
