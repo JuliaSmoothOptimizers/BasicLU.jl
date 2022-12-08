@@ -22,9 +22,11 @@ else
   const BASICLU_INSTALLATION = "YGGDRASIL"
 end
 
-export Param, Info, basiclu_object
+export Param, Info, LUFactor
 export paramnumber, infonumber, getdim, getparam, getinfo, setparam!
 export factorize, getfactors, solve, solve!, solve_for_update, update, maxvolume, maxvolbasis
+
+include("deprecated.jl")
 
 # status codes
 const BASICLU_OK = 0
@@ -97,6 +99,8 @@ const BASICLU_TIME_SINGLETONS = 108
 const BASICLU_TIME_SEARCH_PIVOT = 109
 const BASICLU_TIME_ELIM_PIVOT = 110
 const BASICLU_PIVOT_ERROR = 120
+
+const basiclu_object_type = Cvoid
 
 @kwdef mutable struct Param
     # Factorization parameters
@@ -288,9 +292,9 @@ function infonumber(name::Symbol)
 end
 
 """
-    F = basiclu_object(dim::Int64)
+    F = LUFactor(dim::Int64)
 """
-mutable struct basiclu_object
+mutable struct LUFactor
     istore::Ptr{Int64}
     xstore::Ptr{Float64}
     Li::Ptr{Int64}
@@ -303,25 +307,25 @@ mutable struct basiclu_object
     ilhs::Ptr{Int64}
     nzlhs::Int64
     realloc_factor::Float64
-    function basiclu_object(dim::Int64)
+    function LUFactor(dim::Int64)
         F = new()
         retcode = ccall((:basiclu_obj_initialize, libbasiclu), Int64,
-                        (Ptr{basiclu_object}, Int64),
+                        (Ptr{basiclu_object_type}, Int64),
                         pointer_from_objref(F), dim)
         checkretcode("basiclu_obj_initialize", retcode)
         finalizer(F) do x
             ccall((:basiclu_obj_free, libbasiclu), Cvoid,
-                  (Ptr{basiclu_object},), pointer_from_objref(x))
+                  (Ptr{basiclu_object_type},), pointer_from_objref(x))
         end
     end
 end
 
-function getdim(F::basiclu_object)
+function getdim(F::LUFactor)
     ccall((:basiclu_obj_get_dim, libbasiclu), Int64,
-          (Ptr{basiclu_object},), pointer_from_objref(F))
+          (Ptr{basiclu_object_type},), pointer_from_objref(F))
 end
 
-function getparam(F::basiclu_object, name::Symbol)
+function getparam(F::LUFactor, name::Symbol)
     val = 0.0
     if F.xstore != C_NULL
         val = unsafe_load(F.xstore, paramnumber(name) + 1)
@@ -329,7 +333,7 @@ function getparam(F::basiclu_object, name::Symbol)
     convert(fieldtype(Param, name), val)
 end
 
-function getparam(F::basiclu_object)
+function getparam(F::LUFactor)
     param = Param()
     for f in fieldnames(Param)
         setfield!(param, f, getparam(F, f))
@@ -337,19 +341,19 @@ function getparam(F::basiclu_object)
     param
 end
 
-function setparam!(F::basiclu_object, name::Symbol, val)
+function setparam!(F::LUFactor, name::Symbol, val)
     if F.xstore != C_NULL
         unsafe_store!(F.xstore, val, paramnumber(name) + 1)
     end
 end
 
-function setparam!(F::basiclu_object, param::Param)
+function setparam!(F::LUFactor, param::Param)
     for f in fieldnames(Param)
         setparam!(F, f, getfield(param, f))
     end
 end
 
-function getinfo(F::basiclu_object, name::Symbol)
+function getinfo(F::LUFactor, name::Symbol)
     val = 0.0
     if F.xstore != C_NULL
         val = unsafe_load(F.xstore, infonumber(name) + 1)
@@ -357,7 +361,7 @@ function getinfo(F::basiclu_object, name::Symbol)
     convert(fieldtype(Info, name), val)
 end
 
-function getinfo(F::basiclu_object)
+function getinfo(F::LUFactor)
     info = Info()
     for f in fieldnames(Info)
         setfield!(info, f, getinfo(F, f))
@@ -366,7 +370,7 @@ function getinfo(F::basiclu_object)
 end
 
 """
-    factorize(F::basiclu_object, B::SparseMatrixCSC{Float64, Int64}; check::Bool=true)
+    factorize(F::LUFactor, B::SparseMatrixCSC{Float64, Int64}; check::Bool=true)
 
 Factorize sparse matrix `B`, which must be square and have the dimension for
 which `F` was created.
@@ -381,7 +385,7 @@ be obtained with `getinfo(F, :nPivot)`.
 When `check = true`, an error is thrown if the number of pivot steps is less
 than the dimension of `B`.
 """
-function factorize(F::basiclu_object, B::SparseMatrixCSC{Float64, Int64}; check::Bool=true)
+function factorize(F::LUFactor, B::SparseMatrixCSC{Float64, Int64}; check::Bool=true)
     dim = getdim(F)
     m = checksquare(B)
     if dim != m
@@ -392,7 +396,7 @@ function factorize(F::basiclu_object, B::SparseMatrixCSC{Float64, Int64}; check:
         Bi = rowvals(B) .- 1
         Bx = nonzeros(B)        # don't need a copy
         retcode = ccall((:basiclu_obj_factorize, libbasiclu), Int64,
-                        (Ptr{basiclu_object}, Ptr{Int64}, Ptr{Int64}, Ptr{Int64}, Ptr{Float64}),
+                        (Ptr{basiclu_object_type}, Ptr{Int64}, Ptr{Int64}, Ptr{Int64}, Ptr{Float64}),
                         pointer_from_objref(F), Bp, pointer(Bp, 2), Bi, Bx)
         if retcode == BASICLU_WARNING_singular_matrix && !check
             retcode = BASICLU_OK
@@ -402,7 +406,7 @@ function factorize(F::basiclu_object, B::SparseMatrixCSC{Float64, Int64}; check:
 end
 
 """
-    L, U, p, q = getfactors(F::basiclu_object) -> L::SparseMatrixCSC{Float64, Int64},
+    L, U, p, q = getfactors(F::LUFactor) -> L::SparseMatrixCSC{Float64, Int64},
                                                   U::SparseMatrixCSC{Float64, Int64},
                                                   p::Vector{Int64},
                                                   q::Vector{Int64}
@@ -411,7 +415,7 @@ Extract LU factors after fresh factorization. `L` is unit lower triangular, `U`
 is upper triangular and `p` and `q` are permutation vectors such that (ignoring
 round-off errors) `B[p,q] = L * U` when matrix `B` was factorizied.
 """
-function getfactors(F::basiclu_object)
+function getfactors(F::LUFactor)
     if getinfo(F, :nUpdate) != 0
         throw(ErrorException("cannot extract LU factors after factorization has been updated"))
     end
@@ -433,7 +437,7 @@ function getfactors(F::basiclu_object)
     Urowidx = Vector{Int64}(undef, info.nElemU + dim)
     Uvalue = Vector{Float64}(undef, info.nElemU + dim)
     retcode = ccall((:basiclu_obj_get_factors, libbasiclu), Int64,
-                    (Ptr{basiclu_object}, Ptr{Int64}, Ptr{Int64},
+                    (Ptr{basiclu_object_type}, Ptr{Int64}, Ptr{Int64},
                      Ptr{Int64}, Ptr{Int64}, Ptr{Float64},
                      Ptr{Int64}, Ptr{Int64}, Ptr{Float64}),
                     pointer_from_objref(F), rowperm, colperm,
@@ -449,23 +453,23 @@ function getfactors(F::basiclu_object)
 end
 
 """
-    x = solve(F::basiclu_object, rhs::Vector{Float64}, trans::Char) -> Vector{Float64}
+    x = solve(F::LUFactor, rhs::Vector{Float64}, trans::Char) -> Vector{Float64}
 
 Solve linear system with dense right-hand side. `rhs` is not modified.
 `trans` must be `'T'` for transposed solve or `'N'` for forward solve.
 """
-function solve(F::basiclu_object, rhs::Vector{Float64}, trans::Char)
+function solve(F::LUFactor, rhs::Vector{Float64}, trans::Char)
     lhs = copy(rhs)
     solve!(F, lhs, trans)
 end
 
 """
-    solve!(F::basiclu_object, rhs::Vector{Float64}, trans::Char) -> Vector{Float64}
+    solve!(F::LUFactor, rhs::Vector{Float64}, trans::Char) -> Vector{Float64}
 
 Solve linear system with dense right-hand side. Solution overwrites `rhs`.
 `trans` must be `'T'` for transposed solve or `'N'` for forward solve.
 """
-function solve!(F::basiclu_object, rhs::Vector{Float64}, trans::Char)
+function solve!(F::LUFactor, rhs::Vector{Float64}, trans::Char)
     checktrans(trans)
     dim = getdim(F)
     if length(rhs) != dim
@@ -473,7 +477,7 @@ function solve!(F::basiclu_object, rhs::Vector{Float64}, trans::Char)
     end
     if dim != 0
         retcode = ccall((:basiclu_obj_solve_dense, libbasiclu), Int64,
-                        (Ptr{basiclu_object},  Ptr{Float64}, Ptr{Float64}, Cchar),
+                        (Ptr{basiclu_object_type},  Ptr{Float64}, Ptr{Float64}, Cchar),
                         pointer_from_objref(F), rhs, rhs, trans)
         if retcode == BASICLU_ERROR_invalid_call
             throw(ErrorException("no factorization available"))
@@ -484,23 +488,23 @@ function solve!(F::basiclu_object, rhs::Vector{Float64}, trans::Char)
 end
 
 """
-    x = solve(F::basiclu_object, rhs::SparseVector{Float64, Int64}, trans::Char) -> SparseVector{Float64, Int64}
+    x = solve(F::LUFactor, rhs::SparseVector{Float64, Int64}, trans::Char) -> SparseVector{Float64, Int64}
 
 Solve linear system with sparse right-hand side. `rhs` is not modified.
 `trans` must be `'T'` for transposed solve or `'N'` for forward solve.
 """
-function solve(F::basiclu_object, rhs::SparseVector{Float64, Int64}, trans::Char)
+function solve(F::LUFactor, rhs::SparseVector{Float64, Int64}, trans::Char)
     lhs = copy(rhs)
     solve!(F, lhs, trans)
 end
 
 """
-    solve!(F::basiclu_object, rhs::SparseVector{Float64, Int64}, trans::Char) -> SparseVector{Float64, Int64}
+    solve!(F::LUFactor, rhs::SparseVector{Float64, Int64}, trans::Char) -> SparseVector{Float64, Int64}
 
 Solve linear system with sparse right-hand side. Solution overwrites `rhs`.
 `trans` must be `'T'` for transposed solve or `'N'` for forward solve.
 """
-function solve!(F::basiclu_object, rhs::SparseVector{Float64, Int64}, trans::Char)
+function solve!(F::LUFactor, rhs::SparseVector{Float64, Int64}, trans::Char)
     checktrans(trans)
     dim = getdim(F)
     if length(rhs) != dim
@@ -510,7 +514,7 @@ function solve!(F::basiclu_object, rhs::SparseVector{Float64, Int64}, trans::Cha
         return spzeros(dim)
     end
     retcode = ccall((:basiclu_obj_solve_sparse, libbasiclu), Int64,
-                    (Ptr{basiclu_object},  Int64, Ptr{Int64}, Ptr{Float64}, Cchar),
+                    (Ptr{basiclu_object_type},  Int64, Ptr{Int64}, Ptr{Float64}, Cchar),
                     pointer_from_objref(F), nnz(rhs), rowvals(rhs) .- 1, nonzeros(rhs), trans)
     if retcode == BASICLU_ERROR_invalid_call
         throw(ErrorException("no factorization available"))
@@ -520,7 +524,7 @@ function solve!(F::basiclu_object, rhs::SparseVector{Float64, Int64}, trans::Cha
 end
 
 """
-    solve_for_update(F::basiclu_object, rhs::SparseVector{Float64, Int64}; getsol::Bool=false) -> SparseVector{Float64, Int64}
+    solve_for_update(F::LUFactor, rhs::SparseVector{Float64, Int64}; getsol::Bool=false) -> SparseVector{Float64, Int64}
 
 Solve forward system in preparation to update the factorization. `rhs` holds the
 column to be inserted into the factorized matrix in the next call to
@@ -528,7 +532,7 @@ column to be inserted into the factorized matrix in the next call to
 solve with right-hand side `rhs` is returned. Otherwise only the update is
 prepared.
 """
-function solve_for_update(F::basiclu_object, rhs::SparseVector{Float64, Int64}; getsol::Bool=false)
+function solve_for_update(F::LUFactor, rhs::SparseVector{Float64, Int64}; getsol::Bool=false)
     dim = getdim(F)
     if length(rhs) != dim
         throw(DimensionMismatch("dimension of right-hand side does not match basiclu object"))
@@ -537,7 +541,7 @@ function solve_for_update(F::basiclu_object, rhs::SparseVector{Float64, Int64}; 
         return getsol ? spzeros(dim) : nothing
     end
     retcode = ccall((:basiclu_obj_solve_for_update, libbasiclu), Int64,
-                    (Ptr{basiclu_object}, Int64, Ptr{Int64}, Ptr{Float64}, Cchar, Int64),
+                    (Ptr{basiclu_object_type}, Int64, Ptr{Int64}, Ptr{Float64}, Cchar, Int64),
                     pointer_from_objref(F), nnz(rhs), rowvals(rhs) .- 1, nonzeros(rhs), 'N', getsol ? 1 : 0)
     if retcode == BASICLU_ERROR_invalid_call
         throw(ErrorException("no factorization available"))
@@ -550,7 +554,7 @@ function solve_for_update(F::basiclu_object, rhs::SparseVector{Float64, Int64}; 
 end
 
 """
-    solve_for_update(F::basiclu_object, pos::Int64; getsol::Bool=false) -> SparseVector{Float64, Int64}
+    solve_for_update(F::LUFactor, pos::Int64; getsol::Bool=false) -> SparseVector{Float64, Int64}
 
 Solve transposed system in preparation to update the factorization. `pos` holds
 the column index of the factorized matrix to be replaced in the next call to
@@ -558,7 +562,7 @@ the column index of the factorized matrix to be replaced in the next call to
 solve with a unit vector as right-hand side is returned. Otherwise only the
 update is prepared.
 """
-function solve_for_update(F::basiclu_object, pos::Int64; getsol::Bool=false)
+function solve_for_update(F::LUFactor, pos::Int64; getsol::Bool=false)
     dim = getdim(F)
     if pos < 1 || pos > dim
         throw(DimensionMismatch("column index outside dimension of basiclu object"))
@@ -567,7 +571,7 @@ function solve_for_update(F::basiclu_object, pos::Int64; getsol::Bool=false)
         return getsol ? spzeros(dim) : nothing
     end
     retcode = ccall((:basiclu_obj_solve_for_update, libbasiclu), Int64,
-                    (Ptr{basiclu_object}, Int64, Ptr{Int64}, Ptr{Float64}, Cchar, Int64),
+                    (Ptr{basiclu_object_type}, Int64, Ptr{Int64}, Ptr{Float64}, Cchar, Int64),
                     pointer_from_objref(F), 0, Ref{Int64}(pos-1), C_NULL, 'T', getsol ? 1 : 0)
     if retcode == BASICLU_ERROR_invalid_call
         throw(ErrorException("no factorization available"))
@@ -580,7 +584,7 @@ function solve_for_update(F::basiclu_object, pos::Int64; getsol::Bool=false)
 end
 
 """
-    update(F::basiclu_object, pivot::Float64) -> Float64
+    update(F::LUFactor, pivot::Float64) -> Float64
 
 Update the factorization after a column modification. The column position and
 the new column must have been set in previous calls to
@@ -597,11 +601,11 @@ An error is thrown when the recomputed pivot element is below the absolute pivot
 tolerance. In this case no update is performed and the old factorization remains
 valid.
 """
-function update(F::basiclu_object, pivot::Float64)
+function update(F::LUFactor, pivot::Float64)
     dim = getdim(F)
     if dim != 0
         retcode = ccall((:basiclu_obj_update, libbasiclu), Int64,
-                        (Ptr{basiclu_object},  Float64),
+                        (Ptr{basiclu_object_type},  Float64),
                         pointer_from_objref(F), pivot)
         if retcode == BASICLU_ERROR_invalid_call
             throw(ErrorException("not prepared for update"))
@@ -612,7 +616,7 @@ function update(F::basiclu_object, pivot::Float64)
 end
 
 """
-    nupdate = maxvolume(F::basiclu_object, A::SparseMatrixCSC{Float64, Int64}, basis::Vector{Int64}, volumetol::Float64=2.0) -> Int64
+    nupdate = maxvolume(F::LUFactor, A::SparseMatrixCSC{Float64, Int64}, basis::Vector{Int64}, volumetol::Float64=2.0) -> Int64
 
 Given an initial basis such that `A[:,basis]` is square and nonsingular, make
 one pass over the nonbasic columns of `A` and pivot each column into the basis
@@ -620,7 +624,7 @@ when it increases the absolute value of the determinant of the basis matrix by
 more than a factor `volumetol`. On return `basis` has been updated. Return the
 number of basis updates performed.
 """
-function maxvolume(F::basiclu_object, A::SparseMatrixCSC{Float64, Int64}, basis::Vector{Int64},
+function maxvolume(F::LUFactor, A::SparseMatrixCSC{Float64, Int64}, basis::Vector{Int64},
                    volumetol::Float64=2.0)
     m, n = size(A)
     if m != getdim(F)
@@ -640,7 +644,7 @@ function maxvolume(F::basiclu_object, A::SparseMatrixCSC{Float64, Int64}, basis:
     Ax = nonzeros(A)            # don't need a copy
     p_nupdate = Ref{Int64}(0)
     retcode = ccall((:basiclu_obj_maxvolume, libbasiclu), Int64,
-                    (Ptr{basiclu_object}, Int64, Ptr{Int64}, Ptr{Int64}, Ptr{Float64},
+                    (Ptr{basiclu_object_type}, Int64, Ptr{Int64}, Ptr{Int64}, Ptr{Float64},
                      Ptr{Int64}, Ptr{Int64}, Float64, Ptr{Int64}),
                     pointer_from_objref(F), n, Ap, Ai, Ax, cbasis, isbasic, volumetol, p_nupdate)
     basis[:] = cbasis .+ 1
@@ -650,12 +654,12 @@ end
 
 """
     basis, F = maxvolbasis(A::SparseMatrixCSC{Float64, Int64}; lindeptol::Float64=1e-8,
-                           volumetol::Float64=2.0, maxpass::Int64=2, verbose::Bool=true) -> Vector{Int64}, basiclu_object
+                           volumetol::Float64=2.0, maxpass::Int64=2, verbose::Bool=true) -> Vector{Int64}, LUFactor
 
 Find a set of column indices for the matrix `AI = [A I]` such that `AI[:,basis]`
 is square and nonsingular and the number of slack columns in the basis is
 minimum (this is the row rank deficiency of `A`). Return the vector of column
-indices of `AI` which form the basis matrix and a `basiclu_object` which holds a
+indices of `AI` which form the basis matrix and a `LUFactor` which holds a
 factorization of the basis matrix.
 
 Method: Scale the slack columns of `AI` by `lindeptol` and try to find a maximum
@@ -671,7 +675,7 @@ function maxvolbasis(A::SparseMatrixCSC{Float64, Int64}; lindeptol::Float64=1e-8
     rowmax = max.(rowmax, 1.)
     AI = [A spdiagm(0 => lindeptol.*rowmax)]
     basis = collect(n+1:n+m)
-    F = basiclu_object(m)
+    F = LUFactor(m)
     for pass = 1:maxpass
         nupdate = maxvolume(F, AI, basis, volumetol)
         if verbose
@@ -704,7 +708,7 @@ function checkretcode(funcname::String, retcode::Int64)
     end
 end
 
-function gathersol(F::basiclu_object)
+function gathersol(F::LUFactor)
     dim = getdim(F)
     nzind = Vector{Int64}(undef, F.nzlhs)
     nzval = Vector{Float64}(undef, F.nzlhs)
@@ -712,7 +716,7 @@ function gathersol(F::basiclu_object)
     gathersol!(F, lhs)
 end
 
-function gathersol!(F::basiclu_object, lhs::SparseVector{Float64, Int64})
+function gathersol!(F::LUFactor, lhs::SparseVector{Float64, Int64})
     dim = getdim(F)
     @assert length(lhs) == dim
     if nnz(lhs) != F.nzlhs
