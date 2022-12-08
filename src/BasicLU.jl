@@ -616,6 +616,19 @@ function update(F::LUFactor, pivot::Float64)
 end
 
 """
+    update(F::LUFactor, pos::Int, newcol::SparseVector) -> (lhs, piverr)
+
+Update the factorization by inserting column `newcol` at index `pos`.
+"""
+function update(F::LUFactor, pos::Int, newcol::SparseVector{Float64, Int64})
+    lhs = solve_for_update(F, newcol, getsol=true)
+    piv = lhs[pos]
+    solve_for_update(F, pos)
+    piverr = update(F, piv)
+    return lhs, piverr
+end
+
+"""
     nupdate = maxvolume(F::LUFactor, A::SparseMatrixCSC{Float64, Int64}, basis::Vector{Int64}, volumetol::Float64=2.0) -> Int64
 
 Given an initial basis such that `A[:,basis]` is square and nonsingular, make
