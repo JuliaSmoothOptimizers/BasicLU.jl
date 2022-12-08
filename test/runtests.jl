@@ -13,7 +13,7 @@ test_update("./data/")
 test_maxvolume("./data/")
 
 m = 1000
-obj = basiclu_object(m)
+obj = LUFactor(m)
 B = sprand(m, m, 5e-3) + I
 err = factorize(obj, B)
 rhs = randn(m)

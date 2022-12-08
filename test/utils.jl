@@ -17,7 +17,7 @@ Test special cases.
 function test_small()
     # dimension 0
     B = spzeros(0, 0)
-    blu = basiclu_object(0)
+    blu = LUFactor(0)
     factorize(blu, B)
     rhs = zeros(0)
     lhs = solve(blu, rhs, 'N')
@@ -29,7 +29,7 @@ function test_small()
 
     # dimension 1
     B = sparse(1.0I, 1, 1)
-    blu = basiclu_object(1)
+    blu = LUFactor(1)
     factorize(blu, B)
     rhs = [2.0]
     lhs = solve(blu, rhs, 'N')
@@ -46,7 +46,7 @@ function test_small()
 
     # dimension 1 singular
     B = spzeros(1, 1)
-    blu = basiclu_object(1)
+    blu = LUFactor(1)
     factorize(blu, B, check=false)
     info = getinfo(blu)
     @assert info.nPivot == 0
@@ -86,7 +86,7 @@ function test_factorize(testdir::String, trans::Bool=false)
             (B,Bt) = (Bt,B)
         end
         m = size(B,1)
-        blu = basiclu_object(m)
+        blu = LUFactor(m)
         factorize(blu, B)
         L,U,p,q = getfactors(blu)
         res = norm(L*U-B[p,q], Inf)
@@ -150,7 +150,7 @@ function test_update(A::SparseMatrixCSC{Float64,Int64}, basis::Vector{Int64}, in
     niter = length(invar)
     map2basis = zeros(Int64, n)
     map2basis[basis] = 1:m
-    blu = basiclu_object(m)
+    blu = LUFactor(m)
     param = getparam(blu)
     #param.relPivotTol = 0.5
     setparam!(blu, param)
