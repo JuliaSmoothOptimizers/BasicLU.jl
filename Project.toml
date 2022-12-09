@@ -1,7 +1,7 @@
 name = "BasicLU"
 uuid = "f55c55da-c227-4c78-8e30-b72a48476979"
 authors = ["Lukas Schork (@lschork2)", "Alexis Montoison (@amontoison)"]
-version = "0.2.0"
+version = "0.2.1"
 
 [deps]
 Libdl = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
