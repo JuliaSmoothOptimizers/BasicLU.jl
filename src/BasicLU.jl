@@ -600,17 +600,12 @@ tolerance. In this case no update is performed and the old factorization remains
 valid.
 """
 function update(F::LUFactor, pivot::Float64)
-    dim = getdim(F)
-    if dim != 0
-        retcode = ccall((:basiclu_obj_update, libbasiclu), Int64,
-                        (Ptr{Cvoid},  Float64),
-                        pointer_from_objref(F), pivot)
-        if retcode == BASICLU_ERROR_invalid_call
-            throw(ErrorException("not prepared for update"))
-        end
-        checkretcode("basiclu_update", retcode)
+    (retcode, piverr) = update_retcode(F, pivot)
+    if retcode == BASICLU_ERROR_invalid_call
+        throw(ErrorException("not prepared for update"))
     end
-    getinfo(F, :pivotError)
+    checkretcode("basiclu_update", retcode)
+    return piverr
 end
 
 """
@@ -619,11 +614,41 @@ end
 Update the factorization by inserting column `newcol` at index `pos`.
 """
 function update(F::LUFactor, pos::Int, newcol::SparseVector{Float64, Int64})
+    (retcode, lhs, piverr) = update_retcode(F, pos, newcol)
+    if retcode == BASICLU_ERROR_invalid_call
+        throw(ErrorException("not prepared for update"))
+    end
+    checkretcode("basiclu_update", retcode)
+    return lhs, piverr
+end
+
+"""
+    update_retcode(F::LUFactor, pivot::Float64) -> (retcode, piverr)
+
+Similar to `update(F, pivot)` but returns the return code from BasicLU so that users can handle them.
+"""
+function update_retcode(F::LUFactor, pivot::Float64)
+    dim = getdim(F)
+    if dim == 0
+        return (BASICLU_OK, 0.0)
+    end
+    retcode = ccall((:basiclu_obj_update, libbasiclu), Int64,
+                    (Ptr{Cvoid},  Float64),
+                    pointer_from_objref(F), pivot)
+    return retcode, getinfo(F, :pivotError)
+end
+
+"""
+    update_retcode(F::LUFactor, pos::Int, newcol::SparseVector) -> (retcode, lhs, piverr)
+
+Similar to `update_retcode(F, pos, newcol)` but returns the code from BasicLU so that users can handle them.
+"""
+function update_retcode(F::LUFactor, pos::Int, newcol::SparseVector{Float64, Int64})
     lhs = solve_for_update(F, newcol, getsol=true)
     piv = lhs[pos]
     solve_for_update(F, pos)
-    piverr = update(F, piv)
-    return lhs, piverr
+    (retcode, piverr) = update_retcode(F, piv)
+    return retcode, lhs, piverr
 end
 
 """
